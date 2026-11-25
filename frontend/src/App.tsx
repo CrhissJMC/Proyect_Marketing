@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { CartToast, PageLoader } from "./components/ui";
@@ -48,11 +48,11 @@ function StoreLayout() {
     <>
       <a href="#contenido" className="sr-only">Saltar al contenido</a>
       <Header />
-      <AnimatePresence mode="wait">
-        <motion.main id="contenido" key={location.pathname} className="page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-          <Outlet />
-        </motion.main>
-      </AnimatePresence>
+      {/* Solo animación de entrada: una salida con AnimatePresence se atascaba en opacidad 0
+          cuando la página saliente se volvía a renderizar (p. ej., checkout → pago). */}
+      <motion.main id="contenido" key={location.pathname} className="page" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <Outlet />
+      </motion.main>
       <Footer />
       <CartToast />
     </>

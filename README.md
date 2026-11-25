@@ -19,7 +19,7 @@ Prototipo académico de comercio electrónico para la **Cafetería APU**, desarr
    Copy-Item .env.example .env
    ```
 
-   Cambia `JWT_SECRET` por un valor aleatorio. En `.env.example` está la cuenta de administración de prueba.
+   Cambia `JWT_SECRET` y `ADMIN_PASSWORD` por valores propios: con el túnel activo, el panel es accesible desde internet.
 
 2. Levanta la base de datos, la API y la tienda web:
 
@@ -29,7 +29,7 @@ Prototipo académico de comercio electrónico para la **Cafetería APU**, desarr
 
    Al iniciar, la API aplica las migraciones y carga el catálogo y las promociones.
 
-3. Abre la tienda: <http://localhost:8080>. El panel de administración está en <http://localhost:8080/admin> (cuenta de prueba en `.env.example`). La API también responde directamente en <http://localhost:4000/api/health>.
+3. Abre la tienda: <http://localhost:8080>. El panel de administración está en <http://localhost:8080/admin> (con el correo y la contraseña que definas en `.env`). La API también responde directamente en <http://localhost:4000/api/health>.
 
 ### Acceso público con Cloudflare
 
