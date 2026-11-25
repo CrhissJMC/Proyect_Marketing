@@ -1,0 +1,58 @@
+name: apu-tienda
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: America/Lima
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # Solo en la máquina local (para herramientas como DBeaver o pgAdmin).
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      PORT: 4000
+      TZ: America/Lima
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+
+  # Tienda web (React) servida por nginx; reenvía /api a la API.
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+
+  # Túnel rápido de Cloudflare (sin cuenta). Se activa con:
+  #   docker compose --profile tunnel up -d
+  # La URL pública https://<algo>.trycloudflare.com aparece en: docker compose logs tunnel
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://web:80
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
